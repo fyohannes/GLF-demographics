@@ -1,0 +1,327 @@
+---
+title: "GLF Boston Portfolio Revenue"
+author: "Feven Yohannes"
+date: "July 20, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(readr)
+library(devtools)
+library(dplyr)
+library(janitor)
+library(ggplot2)
+library(lubridate)
+library(extrafont)
+library(plyr)
+
+# Need the two above for geom_area
+
+library(reshape2)
+
+# Need this to reshape my data frame
+
+library(tidyverse)
+
+dir.create("raw-data")
+
+data <- read_csv("raw-data/BOS - Annual Data Report (NEW) - Leveraged Dollars (All Time - Annual) - BOS - Annual Data Report (NEW) - Leveraged Dollars (All Time - Annual).csv",col_types = cols(
+  `Reporting Year` = col_character(),
+  Site = col_character(),
+  Organization = col_character(),
+  FYE = col_character(),
+  `Annual GL Payout` = col_character(),
+  `Annual Revenue` = col_character(),
+  `Leveraged Dollars` = col_character()
+))
+
+
+# Cleaning names
+
+data <- data %>%
+  clean_names() %>%
+   separate(reporting_year, c("start_year", "end_year")) 
+
+# Cleaning Annual Gl Payout
+# Removing commas and dollar signs
+# Making the variable into a numeric 
+
+data$annual_gl_payout = gsub("\\$", "", data$annual_gl_payout)
+data$annual_gl_payout = gsub(",", "", data$annual_gl_payout)
+data<- data %>%
+  mutate(annual_gl_payout= as.numeric(annual_gl_payout))
+
+# Cleaning Annual Revenue
+
+
+data$annual_revenue = gsub("\\$", "", data$annual_revenue)
+data$annual_revenue = gsub(",", "", data$annual_revenue)
+data<- data %>%
+  mutate(annual_revenue= as.numeric(annual_revenue))
+
+# Cleaning Leveraged dollars
+
+data$leveraged_dollars = gsub("\\$", "", data$leveraged_dollars)
+data$leveraged_dollars = gsub(",", "", data$leveraged_dollars)
+data<- data %>%
+  mutate(leveraged_dollars= as.numeric(leveraged_dollars))
+
+# Filtering out the 2019-2020 year because there is no data
+
+data<- data %>%
+  filter(start_year != "2019")
+
+# Making the data longer for the graphs
+
+
+df <- data %>% gather(Revenue_type,Revenue,"annual_gl_payout","leveraged_dollars")
+
+```
+
+
+```{r,Friends of the Children}
+
+# Filtering 
+
+data1 <-df %>%
+  filter(organization=="Friends of the Children (FOC BOS)") 
+
+# Creating the Graph
+
+data1 %>%
+  ggplot(aes(x=start_year,y=Revenue)) + geom_col(aes(fill = Revenue_type, group = Revenue_type),position = position_stack(reverse = T)) +
+  labs(title="Yearly Revenue for Friends of the Children", 
+       subtitle="GreenLight Fund Dollars vs Leveraged Dollars", 
+       x="Start Year",
+       y="Total Revenue") + 
+  theme(legend.title = element_text(color = "black", size = 12),legend.key.width = unit(0.8,"cm"),legend.key.size = unit(1, "cm")) +theme(axis.text.x = element_text( 
+    angle = 40, 
+    size=10,  
+    face=3)
+  ) +
+  theme(
+    plot.caption = element_text(hjust = 0, face = "italic")) +
+  scale_fill_discrete(name = "Revenue Type", labels = c("Green Light Payout", "Leveraged Dollars")) +
+  theme(plot.title = element_text(face = "bold"))
+                                                  
+            
+```
+
+```{r, Raising a Reader}
+
+data2 <- df %>%
+  filter(organization=="Raising A Reader - MA (RARMA BOS)")
+
+data2 %>%
+  ggplot(aes(x=start_year,y=Revenue)) + geom_col(aes(fill = Revenue_type, group = Revenue_type),position = position_stack(reverse = T)) +
+  labs(title="Yearly Revenue for Raising a Reader", 
+       subtitle="GreenLight Fund Dollars vs Leveraged Dollars", 
+       x="Start Year",
+       y="Total Revenue") + 
+  theme(legend.title = element_text(color = "black", size = 12),legend.key.width = unit(0.8,"cm"),legend.key.size = unit(1, "cm")) +theme(axis.text.x = element_text( 
+    angle = 40, 
+    size=10,  
+    face=3)
+  ) +
+  theme(
+    plot.caption = element_text(hjust = 0, face = "italic")) +
+  scale_fill_discrete(name = "Revenue Type", labels = c("Green Light Payout", "Leveraged Dollars")) +
+  theme(plot.title = element_text(face = "bold"))
+
+```
+
+```{r,Peer Health Exchange}
+
+data3 <- df %>%
+  filter(organization=="Peer Health Exchange (PHE BOS)")
+
+data3 %>%
+  ggplot(aes(x=start_year,y=Revenue)) + geom_col(aes(fill = Revenue_type, group = Revenue_type),position = position_stack(reverse = T)) +
+  labs(title="Yearly Revenue for Peer Health Exchange", 
+       subtitle="GreenLight Fund Dollars vs Leveraged Dollars", 
+       x="Start Year",
+       y="Total Revenue") + 
+  theme(legend.title = element_text(color = "black", size = 12),legend.key.width = unit(0.8,"cm"),legend.key.size = unit(1, "cm")) +theme(axis.text.x = element_text( 
+    angle = 40, 
+    size=10,  
+    face=3)
+  ) +
+  theme(
+    plot.caption = element_text(hjust = 0, face = "italic")) +
+  scale_fill_discrete(name = "Revenue Type", labels = c("Green Light Payout", "Leveraged Dollars")) + 
+  scale_y_continuous(labels = scales::comma) +
+  theme(plot.title = element_text(face = "bold"))
+
+```
+
+```{r,Youth Villages}
+
+data4 <- df %>%
+  filter(organization=="Youth Villages (YV BOS)")
+
+data4 %>%
+  ggplot(aes(x=start_year,y=Revenue)) + geom_col(aes(fill = Revenue_type, group = Revenue_type),position = position_stack(reverse = T)) +
+  labs(title="Yearly Revenue for Peer Health Exchange", 
+       subtitle="GreenLight Fund Dollars vs Leveraged Dollars", 
+       x="Start Year",
+       y="Total Revenue") + 
+  theme(legend.title = element_text(color = "black", size = 12),legend.key.width = unit(0.8,"cm"),legend.key.size = unit(1, "cm")) +theme(axis.text.x = element_text( 
+    angle = 40, 
+    size=10,  
+    face=3)
+  ) +
+  theme(
+    plot.caption = element_text(hjust = 0, face = "italic")) +
+  scale_fill_discrete(name = "Revenue Type", labels = c("Green Light Payout", "Leveraged Dollars")) + 
+  scale_y_continuous(labels = scales::comma) +
+  theme(plot.title = element_text(face = "bold"))
+
+
+```
+
+```{r,Family Independence Iniative}
+
+data5 <- df %>%
+  filter(organization=="Family Independence Initiative (FII BOS)")
+
+
+data5 %>%
+  ggplot(aes(x=start_year,y=Revenue)) + geom_col(aes(fill = Revenue_type, group = Revenue_type),position = position_stack(reverse = T)) +
+  labs(title="Yearly Revenue for Family Independence Initiative", 
+       subtitle="GreenLight Fund Dollars vs Leveraged Dollars", 
+       x="Start Year",
+       y="Total Revenue") + 
+  theme(legend.title = element_text(color = "black", size = 12),legend.key.width = unit(0.8,"cm"),legend.key.size = unit(1, "cm")) +theme(axis.text.x = element_text( 
+    angle = 40, 
+    size=10,  
+    face=3)
+  ) +
+  theme(
+    plot.caption = element_text(hjust = 0, face = "italic")) +
+  scale_fill_discrete(name = "Revenue Type", labels = c("Green Light Payout", "Leveraged Dollars")) + 
+  scale_y_continuous(labels = scales::comma) +
+  theme(plot.title = element_text(face = "bold"))
+
+
+```
+
+```{r, Single Stop}
+
+data6 <- df %>%
+  filter(organization=="Single Stop USA (SSUSA BOS)")
+
+
+data6 %>%
+  ggplot(aes(x=start_year,y=Revenue)) + geom_col(aes(fill = Revenue_type, group = Revenue_type),position = position_stack(reverse = T)) +
+  labs(title="Yearly Revenue for Family Independence Initiative", 
+       subtitle="GreenLight Fund Dollars vs Leveraged Dollars", 
+       x="Start Year",
+       y="Total Revenue") + 
+  theme(legend.title = element_text(color = "black", size = 12),legend.key.width = unit(0.8,"cm"),legend.key.size = unit(1, "cm")) +theme(axis.text.x = element_text( 
+    angle = 40, 
+    size=10,  
+    face=3)
+  ) +
+  theme(
+    plot.caption = element_text(hjust = 0, face = "italic")) +
+  scale_fill_discrete(name = "Revenue Type", labels = c("Green Light Payout", "Leveraged Dollars")) + 
+  scale_y_continuous(labels = scales::comma) +
+  theme(plot.title = element_text(face = "bold"))
+
+```
+```{r, New Teacher Center}
+data7 <- df %>%
+  filter(organization=="New Teacher Center (NTC BOS)")
+
+
+data7 %>%
+  ggplot(aes(x=start_year,y=Revenue)) + geom_col(aes(fill = Revenue_type, group = Revenue_type),position = position_stack(reverse = T)) +
+  labs(title="Yearly Revenue for New Teacher Center", 
+       subtitle="GreenLight Fund Dollars vs Leveraged Dollars", 
+       x="Start Year",
+       y="Total Revenue") + 
+  theme(legend.title = element_text(color = "black", size = 12),legend.key.width = unit(0.8,"cm"),legend.key.size = unit(1, "cm")) +theme(axis.text.x = element_text( 
+    angle = 40, 
+    size=10,  
+    face=3)
+  ) +
+  theme(
+    plot.caption = element_text(hjust = 0, face = "italic")) +
+  scale_fill_discrete(name = "Revenue Type", labels = c("Green Light Payout", "Leveraged Dollars")) + 
+  scale_y_continuous(labels = scales::comma) +
+  theme(plot.title = element_text(face = "bold"))
+```
+
+```{r, Blueprint Schools}
+data8 <- df %>%
+  filter(organization=="Blueprint Schools Network (BSN BOS)")
+
+
+data8 %>%
+  ggplot(aes(x=start_year,y=Revenue)) + geom_col(aes(fill = Revenue_type, group = Revenue_type),position = position_stack(reverse = T)) +
+  labs(title="Yearly Revenue for Blueprint Schools Network", 
+       subtitle="GreenLight Fund Dollars vs Leveraged Dollars", 
+       x="Start Year",
+       y="Total Revenue") + 
+  theme(legend.title = element_text(color = "black", size = 12),legend.key.width = unit(0.8,"cm"),legend.key.size = unit(1, "cm")) +theme(axis.text.x = element_text( 
+    angle = 40, 
+    size=10,  
+    face=3)
+  ) +
+  theme(
+    plot.caption = element_text(hjust = 0, face = "italic")) +
+  scale_fill_discrete(name = "Revenue Type", labels = c("Green Light Payout", "Leveraged Dollars")) + 
+  scale_y_continuous(labels = scales::comma) +
+  theme(plot.title = element_text(face = "bold"))
+```
+```{r, College Advising Corps}
+
+data9 <- df %>%
+  filter(organization=="College Advising Corps (CAC BOS)")
+
+
+data9 %>%
+  ggplot(aes(x=start_year,y=Revenue)) + geom_col(aes(fill = Revenue_type, group = Revenue_type),position = position_stack(reverse = T)) +
+  labs(title="Yearly Revenue for College Advising Corps", 
+       subtitle="GreenLight Fund Dollars vs Leveraged Dollars", 
+       x="Start Year",
+       y="Total Revenue") + 
+  theme(legend.title = element_text(color = "black", size = 12),legend.key.width = unit(0.8,"cm"),legend.key.size = unit(1, "cm")) +theme(axis.text.x = element_text( 
+    angle = 40, 
+    size=10,  
+    face=3)
+  ) +
+  theme(
+    plot.caption = element_text(hjust = 0, face = "italic")) +
+  scale_fill_discrete(name = "Revenue Type", labels = c("Green Light Payout", "Leveraged Dollars")) + 
+  scale_y_continuous(labels = scales::comma) +
+  theme(plot.title = element_text(face = "bold"))
+
+```
+```{r, Care Message}
+
+data10 <- df %>%
+  filter(organization=="CareMessage (CM BOS)")
+
+
+data10 %>%
+  ggplot(aes(x=start_year,y=Revenue)) + geom_col(aes(fill = Revenue_type, group = Revenue_type),position = position_stack(reverse = T)) +
+  labs(title="Yearly Revenue for CareMessage", 
+       subtitle="GreenLight Fund Dollars vs Leveraged Dollars", 
+       x="Start Year",
+       y="Total Revenue") + 
+  theme(legend.title = element_text(color = "black", size = 12),legend.key.width = unit(0.8,"cm"),legend.key.size = unit(1, "cm")) +theme(axis.text.x = element_text( 
+    angle = 40, 
+    size=10,  
+    face=3)
+  ) +
+  theme(
+    plot.caption = element_text(hjust = 0, face = "italic")) +
+  scale_fill_discrete(name = "Revenue Type", labels = c("Green Light Payout", "Leveraged Dollars")) + 
+  scale_y_continuous(labels = scales::comma) +
+  theme(plot.title = element_text(face = "bold"))
+
+
+```
